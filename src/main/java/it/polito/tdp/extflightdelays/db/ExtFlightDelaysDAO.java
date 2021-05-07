@@ -158,7 +158,7 @@ List<Rotta>result= new LinkedList<>();
 				Airport destinazione= idMap.get(rs.getInt("id_a2"));
 				//controllo che questi siano presenti anche nella mappa
 		if(sorgente!=null && destinazione!=null) {
-		  result.add(new Rotta(idMap.get(rs.getInt("id_a1")),idMap.get(rs.getInt("id_a1")), rs.getInt("numVoli") ));
+		  result.add(new Rotta(idMap.get(rs.getInt("id_a1")),idMap.get(rs.getInt("id_a2")), rs.getInt("numVoli") ));
 		} else {
 				System.out.println("ERRORE IN GETROTTE");
 				

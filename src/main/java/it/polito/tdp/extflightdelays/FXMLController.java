@@ -1,6 +1,7 @@
 package it.polito.tdp.extflightdelays;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.extflightdelays.model.Airport;
@@ -54,6 +55,11 @@ public class FXMLController {
     	//tutto ok
     	this.model.creaGrafo(x);
     	
+    	
+    	txtResult.appendText("GRAFO CREATO!\n");
+    	txtResult.appendText("# VERTICI: " + model.getNumeroVertici() + "\n");
+    	txtResult.appendText("# ARCHI: " + model.getNumeroArchi() + "\n");
+    	
     	//popolo i menu a tendina con tutti i vertici del grafo!!! 
     	//non posso invocare il metodo dei vertici complessivi ma quello creato da me prima,
     	//perchè i vertici che popolano il menu devono essere coerenti con quelli presenti nel grafo
@@ -68,14 +74,26 @@ public class FXMLController {
     void doTestConnessione(ActionEvent event) {
     	Airport partenza= cmbBoxAeroportoPartenza.getValue();
     	Airport arrivo= cmbBoxAeroportoDestinazione.getValue();
-    	if(partenza==null || arrivo==null) {
-    		txtResult.setText("DEVI SELEZIONARE ENTRAMBE LE CASELLE");
+    	
+    	if(partenza == null) {
+    		txtResult.setText("Seleziona un aeroporto di partenza");
     		return;
     	}
-    	this.model.trovaPercorso(partenza, arrivo);
-
+    
+    	if(arrivo == null) {
+    		txtResult.setText("Seleziona un aeroporto di arrivo");
+    		return;
+    	}
+    	
+    	List<Airport> percorso = model.trovaPercorso(partenza, arrivo);
+    	
+    	if(percorso == null) {
+    		txtResult.setText("I due nodi non sono collegati");
+    	} else{
+    		txtResult.appendText(partenza + " e " + arrivo + " sono collegati dal seguente percorso:\n\n");
+    		txtResult.appendText(percorso.toString());
+    	}
     }
-
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Scene.fxml'.";

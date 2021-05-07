@@ -79,8 +79,31 @@ public class Model {
 	
 	}
 
+	
+	//collego il metodo del dao
+	
 	public Set<Airport> getVertici() {
-		return this.grafo.vertexSet();
+		if(grafo != null)
+			return grafo.vertexSet();
+		
+		return null;
+	}
+	
+	
+	//creo metodo NUMERO VERTICI E NUMERO ARCHI CHE RESTITUISCA NEL CONTROLLER
+	//TRAMITE LA SIZE IL NUMERO RISPETTIVO
+	 public int getNumeroVertici() {
+		if(grafo != null)
+			return grafo.vertexSet().size();
+		
+		return 0;
+	}
+	
+	public int getNumeroArchi() {
+		if(grafo != null)
+			return grafo.edgeSet().size();
+		
+		return 0;
 	}
 	
 	
