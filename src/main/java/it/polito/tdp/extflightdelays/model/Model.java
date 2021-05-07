@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.event.ConnectedComponentTraversalEvent;
+import org.jgrapht.event.EdgeTraversalEvent;
+import org.jgrapht.event.TraversalListener;
+import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -18,6 +22,8 @@ public class Model {
 	private SimpleWeightedGraph<Airport, DefaultWeightedEdge>grafo;
 	private ExtFlightDelaysDAO dao;
 	private Map<Integer,Airport>idMap;
+	//creo mappa per salvarmi da chi è stato scoperto quel vertice --> SALVO ALBERO DI VISITA
+	private Map<Airport,Airport> visita;  //faccio la new nel metodo trovaPercorso
 	
 	public Model() {
 		dao= new ExtFlightDelaysDAO();
@@ -53,7 +59,9 @@ public class Model {
 			//recupero l'arco
 			DefaultWeightedEdge e= this.grafo.getEdge(r.getA1(), r.getA2());
 			if(e==null) {  //se non c'è un arco 
-				Graphs.addEdgeWithVertices(this.grafo, r.getA1(), r.getA2(), r.getNumeroVoli());
+
+			
+			Graphs.addEdgeWithVertices(grafo, r.getA1(), r.getA2(), r.getNumeroVoli());
 			} else {
 				double pesoVecchio= this.grafo.getEdgeWeight(e);
 				double pesoNuovo= pesoVecchio+ r.getNumeroVoli();
@@ -75,15 +83,81 @@ public class Model {
 		return this.grafo.vertexSet();
 	}
 	
-	/*List<Airport> trovaPercorso(Airport a1, Airport a2){
-		List<Airport> percorso = new LinkedList<>();
-		//creo iteratore visita in ampiezza
-		BreadthFirstIterator<Airport, DefaultWeightedEdge> it= new 	BreadthFirstIterator<>(grafo, a1);
-		
-		
-		while(it.hasNext()) {
-		it.next();
-	} 
 	
-	}*/
+	public List<Airport> trovaPercorso(Airport a1, Airport a2){
+		List<Airport> percorso = new LinkedList<>();
+		//creo iteratore visita in ampiezza --> TIPO VERTICI, TIPO ARCHI 
+		//devo specificare grafo,nodoPartenza
+		BreadthFirstIterator<Airport, DefaultWeightedEdge> bfv= new BreadthFirstIterator<>(grafo, a1);
+		
+		visita= new HashMap<>();
+		visita.put(a1, null); //aggiungo alla mappa solo il nodo radice, l'altro è null
+		
+		
+		//associo all'iteratore un traversalListener --> registra degli eventi --> E' UN INTERFACCIA
+		//DEVO CREARE I SUOI METODI  (add unip...)
+		bfv.addTraversalListener(new TraversalListener<Airport, DefaultWeightedEdge>(){
+
+			@Override
+			public void connectedComponentFinished(ConnectedComponentTraversalEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void connectedComponentStarted(ConnectedComponentTraversalEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			/**
+			 * metodo che ci interessa: arco attraversato  
+			 */
+			@Override
+			public void edgeTraversed(EdgeTraversalEvent<DefaultWeightedEdge> e) {
+				//recupero estremi arco attraversato
+				Airport airport1= grafo.getEdgeSource(e.getEdge());
+				Airport airport2= grafo.getEdgeTarget(e.getEdge());
+				
+				//siccome il grafo è non orientato dobbiamo fare
+				if(visita.containsKey(airport1) && !visita.containsKey(airport2)) {
+					visita.put(airport2, airport1);
+				} else if (visita.containsKey(airport2) && !visita.containsKey(airport1)) {
+					visita.put(airport1, airport2);
+				}
+			}
+
+			@Override
+			public void vertexTraversed(VertexTraversalEvent<Airport> e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void vertexFinished(VertexTraversalEvent<Airport> e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		//visito il grafo un passo alla volta grazie ai metodi hasNext e next
+		//finchè l'iteratore ha un prossimo nodo da visitare, io lo visito
+		while(bfv.hasNext()) {
+		bfv.next();  //restituisce un aeroporto ogni volta ma non trova il percorso --> devo usare il traversalListener
+		}
+		//qui colleghiamo il traversalListener 
+		
+		percorso.add(a2); //aggiungo la destinazione
+		//risalgo la mappa 
+		Airport step= a2;
+		while( visita.get(step)!=null) {  //finhcè la get non arriva alla mia radice, proseguo
+			step= visita.get(step);
+			percorso.add(0,step);
+			
+		}
+	
+	//il percorso è al contrario, posso aggiungere in testa 
+		
+		return percorso;
+	}
 }

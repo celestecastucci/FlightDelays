@@ -48,7 +48,7 @@ public class FXMLController {
     		x= Integer.parseInt(compagnieMinimo.getText());
     	} catch(NumberFormatException e) {
     		txtResult.setText("INSERISCI UN NUMERO");
-    		return ;
+    		return;
     	}
     	
     	//tutto ok
@@ -58,6 +58,7 @@ public class FXMLController {
     	//non posso invocare il metodo dei vertici complessivi ma quello creato da me prima,
     	//perchè i vertici che popolano il menu devono essere coerenti con quelli presenti nel grafo
     	//e in questo caso ho dei vertici filtrati
+    	
     	cmbBoxAeroportoPartenza.getItems().addAll(model.getVertici());
     	cmbBoxAeroportoDestinazione.getItems().addAll(model.getVertici());
     
@@ -65,6 +66,13 @@ public class FXMLController {
 
     @FXML
     void doTestConnessione(ActionEvent event) {
+    	Airport partenza= cmbBoxAeroportoPartenza.getValue();
+    	Airport arrivo= cmbBoxAeroportoDestinazione.getValue();
+    	if(partenza==null || arrivo==null) {
+    		txtResult.setText("DEVI SELEZIONARE ENTRAMBE LE CASELLE");
+    		return;
+    	}
+    	this.model.trovaPercorso(partenza, arrivo);
 
     }
 
